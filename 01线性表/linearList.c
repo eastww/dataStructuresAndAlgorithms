@@ -33,21 +33,25 @@ int initList(listArray list)
 */
 int insertList(listArray list, E element, int index)
 {
-	int i = 0;
-    /* 判断index是否在list内，[0, list->capacity] */
-    if (index < 0 || index > list->capacity + 1)
+    /* 判断index是否在list内，[1, list->capacity] */
+    if (index < 1 || index > list->size + 1)
     {
         return -1;
     }
     /* 判断list是否超过容量 */
     if (list->size == list->capacity)
     {
-        realloc(list->array, sizeof(E) * list->capacity * 2);
+        E *newArray = (E *)realloc(list->array, sizeof(E) * list->capacity * 2);
+        if (newArray == NULL)
+        {
+            return -2;
+        }
+        list->array = newArray;
         list->capacity *= 2; 
     }
     
     /* 先将数据后移一位 */
-    for (i = list->size; i > index - 1; i--)
+    for (int i = list->size; i > index - 1; i--)
     {
         list->array[i] = list->array[i - 1];
     }
@@ -60,19 +64,79 @@ int insertList(listArray list, E element, int index)
 /*
 *   brief: 删除元素
 */
+int deleteList(listArray list, int index)
+{
+    /* 判断是否在list内部 */
+    if (index < 1 || index > list->size)
+    {
+        return -1;
+    }
+    
+    /* 将数组前移一位 */
+    for (int i = index; i < list->size; i++)
+    {
+        list->array[i - 1] = list->array[i];
+    }
+    list->size--;
+
+    return 0;
+}
+
+/*
+*   brief: 获取list长度
+*/
+int getListSize(listArray list)
+{
+    return list->size;
+}
+
+/*
+*   brief: 获取list指定位置元素
+*/
+E* getListElement(listArray list, int index)
+{
+    /* 参数判断 */
+    if (index < 1 || index > list->size)
+    {
+        return NULL;
+    }
+    
+    return &(list->array[index-1]);
+}
+
+/*
+*   brief: 获取list指定元素的位置
+*/
+int findListIndex(listArray list, E element)
+{
+    /* 参数判断 */
+    if (list == NULL)
+    {
+        return -1;
+    }
+    
+    for (int i = 0; i < list->size; i++)
+    {
+        if (list->array[i] == element)
+        {
+            return i+1;
+        }
+    }
+    
+    return 0;
+}
 
 /*
 *   brief: 打印线性表内容
 */
 void printList(listArray list)
 {
-	int i = 0;
     if (list == NULL || list->size == 0)
     {
         printf("linear list is null!");
     }
 
-    for (i = 0; i < list->size; i++)
+    for (int i = 0; i < list->size; i++)
     {
         printf("%d ", list->array[i]);
     }
@@ -87,12 +151,16 @@ int main(void)
     struct list list;
     if (initList(&list) == 0)
     {
-        insertList(&list, 111, 1);
-		printList(&list);
-		insertList(&list, 222, 2);
-		printList(&list);
-		insertList(&list, 333, 3);
-		printList(&list); 
+        for (int i = 1; i <= 30; i++)
+        {
+            insertList(&list, i, i);
+        }
+        printList(&list);
+        printf("list size: %d\n", list.size);
+
+        deleteList(&list, 10);    
+        printList(&list);
+        printf("list size: %d\n", list.size);
     } else
     {
         printf("liner list init failed!");
